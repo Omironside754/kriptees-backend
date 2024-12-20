@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(fileUpload());
 app.use(errorMiddleware);
 const corsOptions = {
-  origin: ['http://localhost:3000','http://localhost:5000','https://kriptees-frontend.onrender.com','https://fastidious-starship-ac9f83.netlify.app','https://kriptees.com'],
+  origin: ['http://localhost:3000','http://localhost:5000','https://fastidious-starship-ac9f83.netlify.app','https://kriptees.com'],
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
