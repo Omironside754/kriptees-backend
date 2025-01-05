@@ -25,20 +25,29 @@ class ApiFeatures {
 
   // filter() the product ==> filetr work base on category
   filter() {
-    const queryCopy = { ...this.queryString }; // making the new object of queryString
-    //  Removing some fields for category
-
-    const removeFields = ["keyword", "page", "limit"]; // here we are filtering data based on other query like category , price so we are removing other query => "keyword", "page", "limit"
-
-    removeFields.forEach((key) => delete queryCopy[key]); // remove unwanted query
-
-    // Filter For Price and Rating
-    let queryStr = JSON.stringify(queryCopy); // converting to string because we using regex for filter data for price
-    // regex => \b => start and end value  || for price : gt --> gretaer then || gte --> gretaer then equal to || lt --> less then || lte --> less then equal to , for finding in range of product.
-    queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (key) => `$${key}`); // key is given price as qurey {"price":{"gt":"200","lt":"255"}}  : 200 to 245 in btew product require.
-    // now mongoose use $ as opretaor so converting it in line 40 : and it will return {"price":{"$gt":"200","$lt":"255"}} $ is for mongoose operator in regex
-    this.query = this.query.find(JSON.parse(queryStr)); // now find product in given range : and first convert it string to json using parse
-
+    const queryCopy = { ...this.queryString };
+    const removeFields = ["keyword", "page", "limit"];
+    removeFields.forEach((key) => delete queryCopy[key]);
+  
+    // Handle price range filter
+    let queryStr = JSON.stringify(queryCopy);
+    queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (key) => `$${key}`);
+  
+    // Handle multiple filters
+    const parsedQuery = JSON.parse(queryStr);
+  
+    // Add specific filters
+    if (this.queryString.size) {
+      parsedQuery.size = this.queryString.size;
+    }
+    if (this.queryString.color) {
+      parsedQuery.color = this.queryString.color;
+    }
+    if (this.queryString.tags) {
+      parsedQuery.tags = { $in: this.queryString.tags.split(',') };
+    }
+  
+    this.query = this.query.find(parsedQuery);
     return this;
   }
 

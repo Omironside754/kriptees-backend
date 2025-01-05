@@ -45,6 +45,18 @@ const productSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
+  size: {
+    type: String,
+    required: [true, "Please select size"],
+    enum: ["S", "M", "L", "XL", "XXL"]
+  },
+  color: {
+    type: String,
+    required: [true, "Please select color"]
+  },
+  tags: [{
+    type: String
+  }],
   reviews: [
     {
       userId: {

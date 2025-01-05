@@ -29,38 +29,46 @@ exports.createProduct = asyncWrapper(async (req, res) => {
   // req.body.user = req.user.id;
   req.body.images = imagesLinks;
 
+  // const data = await ProductModel.create(req.body);
+  // res.status(200).json({ success: true, data: data });
+  if (!req.body.size || !req.body.color) {
+    return next(new ErrorHandler("Please provide size and color", 400));
+  }
+  
   const data = await ProductModel.create(req.body);
-  res.status(200).json({ success: true, data: data });
+  res.status(200).json({ success: true, data });
 });
 
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> get all product >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 exports.getAllProducts = asyncWrapper(async (req, res) => {
-  const resultPerPage = 100; // Number of products visible per page
-  const productsCount = await ProductModel.countDocuments(); // Get total number of products
+  const resultPerPage = 12;
 
-  // Create an instance of the ApiFeatures class, passing the ProductModel.find() query and req.query (queryString)
+  // Create an instance of ApiFeatures for filtering, searching, and pagination
   const apiFeature = new ApiFeatures(ProductModel.find(), req.query)
-    .search() // Apply search filter based on the query parameters
-    .filter(); // Apply additional filters based on the query parameters
+    .search()
+    .filter();
 
-  let products = await apiFeature.query; // Fetch the products based on the applied filters and search
+  // Get the total number of products after filtering and searching
+  const filterdProductCount = await apiFeature.query.clone().countDocuments();
 
-  let filteredProductCount = products.length; // Number of products after filtering (for pagination)
+  // Apply pagination
+  apiFeature.Pagination(resultPerPage);
 
-  apiFeature.Pagination(resultPerPage); // Apply pagination to the products
+  // Fetch the paginated products
+  const products = await apiFeature.query;
 
-  // Mongoose no longer allows executing the same query object twice, so use .clone() to retrieve the products again
-  products = await apiFeature.query.clone(); // Retrieve the paginated products
+  // Get the total number of products in the database
+  const totalProducts = await ProductModel.countDocuments();
+ // console.log(totalProducts);
 
-  res.status(201).json({
+  res.status(200).json({
     success: true,
-    products: products,
-    productsCount: productsCount,
-    resultPerPage: resultPerPage,
-    filteredProductCount: filteredProductCount,
+    products,
+    totalProducts, // Total number of products in the database
+    filterdProductCount, // Products after applying filters and search
+    resultPerPage, // Products per page
   });
-
 });
+
 
 
 
