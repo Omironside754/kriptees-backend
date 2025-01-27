@@ -11,6 +11,7 @@ const {
 } = require("../controller/orderController");
 const { isAuthentictedUser, authorizeRoles } = require("../middleWare/auth");
 const router = express.Router();
+const Order =require("../model/orderModel"); // Import the Order model
 
 router.route("/order/new").post(isAuthentictedUser, newOrder);
 router.route("/order/:id").get(isAuthentictedUser, getSingleOrder);
@@ -21,6 +22,30 @@ router.route("/admin/order/:id")
   .delete(isAuthentictedUser, authorizeRoles("admin"), deleteOrder);
 router.route("/order/track/:orderId").get(isAuthentictedUser, trackOrder);
 router.route("/order/cancel/:orderId").post(isAuthentictedUser, cancelOrder);
+router.put("/order/updatePaymentInfo/:orderId", async (req, res) => {
+  const { orderId } = req.params;
+  const { paymentInfo } = req.body;
+
+  console.log("orderId", orderId)
+
+  try {
+    // Find the order by ID and update paymentInfo
+    const order = await Order.findOneAndUpdate(
+      { ID: orderId }, // Ensure this matches the field in your database
+      { $set: { paymentInfo } },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+
+    res.status(200).json({ success: true, order });
+  } catch (error) {
+    console.error("Error updating payment info:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 module.exports = router;
 

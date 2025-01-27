@@ -76,7 +76,7 @@ exports.newOrder = asyncWrapper(async (req, res, next) => {
   }
 
   const shiprocketOrderData = {
-    order_id: order._id.toString(),
+    order_id: order.ID.toString(),
     order_date: new Date().toISOString().split('T')[0],
     pickup_location: "Primary",
     channel_id: "",
@@ -168,7 +168,8 @@ exports.trackOrder = asyncWrapper(async (req, res, next) => {
   const { orderId } = req.params;
 
   try {
-    const order = await orderModel.findById(orderId);
+    // Use findOne with a query that matches your custom ID field
+    const order = await orderModel.findOne({ ID: orderId });
     if (!order) {
       return next(new ErrorHandler("Order not found", 404));
     }
@@ -197,7 +198,8 @@ exports.trackOrder = asyncWrapper(async (req, res, next) => {
       return res.status(200).json({
         success: true,
         message: "Order has been received but not yet shipped. Tracking information will be available once the order is processed.",
-        orderStatus: orderStatus
+        orderStatus: orderStatus,
+        orderDetails: order // Include the entire order object in the response
       });
     }
 
@@ -211,7 +213,8 @@ exports.trackOrder = asyncWrapper(async (req, res, next) => {
     res.status(200).json({
       success: true,
       trackingDetails: trackingResponse.data,
-      orderStatus: orderStatus
+      orderStatus: orderStatus,
+      orderDetails: order // Include the entire order object in the response
     });
 
   } catch (error) {

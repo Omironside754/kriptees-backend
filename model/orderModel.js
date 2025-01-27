@@ -4,7 +4,8 @@ const orderSchema = new mongoose.Schema({
   // order shiping address
   ID: {
     type: String,
-    required: true
+    required: true,
+    unique: true,
   },
   shippingInfo: {
     firstName: {
@@ -45,6 +46,11 @@ const orderSchema = new mongoose.Schema({
     email: {
       type: String,
       required: true,
+    },
+    shippingPrice: {
+      type: Number,
+      required: true,
+      default: 90,
     },
 
   },
@@ -129,7 +135,7 @@ const orderSchema = new mongoose.Schema({
   shippingPrice: {
     type: Number,
     required: true,
-    default: 0,
+    default: 90,
   },
   // total price will some of all of three above
   totalPrice: {
@@ -151,5 +157,5 @@ const orderSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-
+orderSchema.index({ ID: 1 });
 module.exports = mongoose.model("OrdersModel", orderSchema);
