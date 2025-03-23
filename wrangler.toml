@@ -1,4 +1,3 @@
 name = "kriptees-backend"
 compatibility_date = "2025-03-23"
 main = "server.js"
-account_id = "6e087d3c0ab379551aaebb8d4ae973c"
