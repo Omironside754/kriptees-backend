@@ -31,7 +31,7 @@ exports.loginUser = asyncWrapper(async (req, res, next) => {
   }
   const user = await userModel.findOne({ email }).select("+password"); // .select("+password") because in schema we set set select : false so password is'nt return to anyone so we add +password here for verfication of pass
 
-  // jab user nhi mila data base main given credentials ke sath tab
+ 
   if (!user) {
     return next(new ErrorHandler("Invalid email or password", 401));
   }
@@ -66,32 +66,19 @@ exports.logoutUser = asyncWrapper(async (req, res) => {
 exports.forgotPassword = asyncWrapper(async (req, res, next) => {
   const user = await userModel.findOne({ email: req.body.email });
 
-  // when user with this email not found
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
   }
 
-  // Get ResetPassword Token
-  const resetToken = user.getResetPasswordToken(); // we made this method into userModel for hash resetToken
-  //when we call this metod  getResetPasswordToken  . so in userModel resetPasswordToken has reset token added and resetPasswordExprie also exprie value added but not saved to data base
-  await user.save({ validateBeforeSave: false }); // now save
+  const resetToken = user.getResetPasswordToken();
+  await user.save({ validateBeforeSave: false });
 
-  let resetPasswordUrl = "";
-
-  const isLocal = req.hostname === "localhost" || req.hostname === "127.0.0.1";
-  if (isLocal) {
-    resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
-  } else {
-    resetPasswordUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/password/reset/${resetToken}`;
-  }
+  const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
   const message = `Your password reset token is :- \n\n ${resetPasswordUrl} \n\nIf you have not requested this email then, please ignore it.`;
 
   try {
     await sendEmail({
-      // sendEmail is method writen by us in utils folder.
       email: user.email,
       subject: `Ecommerce Password Recovery`,
       message,
@@ -102,10 +89,8 @@ exports.forgotPassword = asyncWrapper(async (req, res, next) => {
       message: `Email sent to ${user.email} successfully`,
     });
   } catch (error) {
-    // if there any Error then  user.resetPasswordToken and user.resetPasswordExpire has value saved already then undefined both od them for fresh value if user want to try again
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
-
     await user.save({ validateBeforeSave: false });
 
     return next(new ErrorHandler(error.message, 500));
