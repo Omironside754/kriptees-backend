@@ -26,15 +26,14 @@ exports.createProduct = asyncWrapper(async (req, res) => {
       url: result,
     });
   }
-  // req.body.user = req.user.id;
+
   req.body.images = imagesLinks;
 
-  // const data = await ProductModel.create(req.body);
-  // res.status(200).json({ success: true, data: data });
+
   if (!req.body.size || !req.body.color) {
     return next(new ErrorHandler("Please provide size and color", 400));
   }
-  
+
   const data = await ProductModel.create(req.body);
   res.status(200).json({ success: true, data });
 });
@@ -42,36 +41,21 @@ exports.createProduct = asyncWrapper(async (req, res) => {
 exports.getAllProducts = asyncWrapper(async (req, res) => {
   const resultPerPage = 12;
 
-  // Create an instance of ApiFeatures for filtering, searching, and pagination
   const apiFeature = new ApiFeatures(ProductModel.find(), req.query)
     .search()
-    .filter();
+    .filter(); 
 
-  // Get the total number of products after filtering and searching
-  const filterdProductCount = await apiFeature.query.clone().countDocuments();
-
-  // Apply pagination
-  apiFeature.Pagination(resultPerPage);
-
-  // Fetch the paginated products
   const products = await apiFeature.query;
 
-  // Get the total number of products in the database
   const totalProducts = await ProductModel.countDocuments();
- // console.log(totalProducts);
 
   res.status(200).json({
     success: true,
     products,
-    totalProducts, // Total number of products in the database
-    filterdProductCount, // Products after applying filters and search
-    resultPerPage, // Products per page
+    totalProducts,
   });
+
 });
-
-
-
-
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> get all product admin route>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -84,9 +68,6 @@ exports.getAllProductsAdmin = asyncWrapper(async (req, res) => {
   });
 });
 
-
-
-
 //>>>>>>>>>>>>>>>>>> Update Admin Route >>>>>>>>>>>>>>>>>>>>>>>
 exports.updateProduct = asyncWrapper(async (req, res, next) => {
   let product = await ProductModel.findById(req.params.id);
@@ -97,10 +78,10 @@ exports.updateProduct = asyncWrapper(async (req, res, next) => {
   const oldImg = await ProductModel.findById(req.params.id);
 
   let imagesLinks = oldImg.images
-  for (let i = 0; i <imagesLinks.length; i++) {
-    imagesLinks[i].url=req.body.images[i]
+  for (let i = 0; i < imagesLinks.length; i++) {
+    imagesLinks[i].url = req.body.images[i]
   }
-  console.log("IMAGESLINKS:"+ imagesLinks)
+  console.log("IMAGESLINKS:" + imagesLinks)
 
   // req.body.user = req.user.id;
   req.body.images = imagesLinks;
