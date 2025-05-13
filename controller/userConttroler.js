@@ -10,14 +10,6 @@ const cloudinary = require("cloudinary");
 // signUp controller>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 exports.registerUser = asyncWrapper(async (req, res) => {
 
-  // const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-  //   folder: "Avatar", // this folder cloudainry data base manage by us
-  //   width: 150,
-  //   crop: "scale",
-  // });
-
-
-
   const { name, email, password } = req.body;
   const user = await userModel.create({
     name,
@@ -56,7 +48,6 @@ exports.loginUser = asyncWrapper(async (req, res, next) => {
 });
 
 // logOut Controller =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 exports.logoutUser = asyncWrapper(async (req, res) => {
   // delete token for logingOut user =>
   res.cookie("token", null, {
@@ -121,7 +112,7 @@ exports.forgotPassword = asyncWrapper(async (req, res, next) => {
   }
 });
 
-//>>>>>>>>>>>>>>> reset and update password :
+//>>>>>>>>>>>>>>> reset and update password >>>>>>>>>>>>>>> :
 exports.resetPassword = asyncWrapper(async (req, res, next) => {
   // creating token hash because we save resetPasswordToken  in hash form. and we send to user resetToken in hex bytes form in url . now converting that byte form to hex form for matching does user given reset token is same or not which one save in Database
   // we will extract reset token from req.params.token because we sended that token inside nodemailer message url when user will click on that link he will redirect on that  url
@@ -167,16 +158,6 @@ exports.resetPassword = asyncWrapper(async (req, res, next) => {
   sendJWtToken(user, 200, res);
 });
 
-//// Get User Detail  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-exports.getUserDetails = asyncWrapper(async (req, res) => {
-
-  const user = await userModel.findById(req.user.id); // user.id because we set that user into as user.req when user gose autentiction. becauae all data of users set into req.user. only user when logged in then access this function
-  res.status(200).json({
-    success: true,
-    user, // profile details of user
-  });
-});
-
 // update User password>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 exports.updatePassword = asyncWrapper(async (req, res, next) => {
   const user = await userModel.findById(req.user.id).select("+password"); // + password because pass not allowed in shcema to acsess
@@ -196,6 +177,18 @@ exports.updatePassword = asyncWrapper(async (req, res, next) => {
   sendJWtToken(user, 200, res);
 });
 
+//// Get User Detail  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+exports.getUserDetails = asyncWrapper(async (req, res) => {
+
+  const user = await userModel.findById(req.user.id); // user.id because we set that user into as user.req when user gose autentiction. becauae all data of users set into req.user. only user when logged in then access this function
+  res.status(200).json({
+    success: true,
+    user, // profile details of user
+  });
+});
+
+
+
 //>>>>>> Update user Profile>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 exports.updateProfile = asyncWrapper(async (req, res, next) => {
   // object with user new data
@@ -204,27 +197,7 @@ exports.updateProfile = asyncWrapper(async (req, res, next) => {
     email: req.body.email,
   };
 
-  // if avatar not empty then
-  // if (req.body.avatar !== "") {
-  //   const user = await userModel.findById(req.user.id);
-  //   const imageId = user.avatar.public_id;
 
-  //   //  await cloudinary.v2.uploader.destroy(imageId); // delete old Image from cloudnairy
-  //   await cloudinary.v2.uploader.destroy(imageId);
-
-  //   const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-  //     folder: "Avatar", // this folder cloudainry data base manage by us
-  //     width: 150,
-  //     crop: "scale",
-  //   });
-
-  //   newUserData.avatar = {
-  //     public_id: myCloud.public_id, // id for img
-  //     url: myCloud.secure_url, // new User data
-  //   };
-  // }
-
-  // set new value of user
   const user = await userModel.findByIdAndUpdate(req.user.id, newUserData, {
     new: true,
     runValidators: true,
