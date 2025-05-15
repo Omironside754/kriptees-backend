@@ -16,7 +16,9 @@ router.route("/payment/createOrder").post(async (req, res) => {
       order_currency: "INR",
       order_id: orderId,
       customer_details: {
-        customer_id: req.body.shippingInfo.firstName,
+        customer_id: (
+          req.body.shippingInfo.firstName + "_" + req.body.shippingInfo.phoneNo
+        ).replace(/\W+/g, "_"), 
         customer_phone: req.body.shippingInfo.phoneNo,
         customer_name:
           req.body.shippingInfo.firstName + " " + req.body.shippingInfo.lastName,
