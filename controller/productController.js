@@ -4,6 +4,14 @@ const asyncWrapper = require("../middleWare/asyncWrapper");
 const ApiFeatures = require("../utils/apiFeatures");
 const cloudinary = require("cloudinary");
 
+// Configure Cloudinary for optimisation of the images 
+const optimizeCloudinaryUrl = (url, width = 600) => {
+  if (!url.includes("res.cloudinary.com")) return url;
+  const parts = url.split("/upload/");
+  return `${parts[0]}/upload/q_auto,f_auto,w_${width}/${parts[1]}`;
+};
+
+
 // >>>>>>>>>>>>>>>>>>>>> createProduct Admin route  >>>>>>>>>>>>>>>>>>>>>>>>
 exports.createProduct = asyncWrapper(async (req, res) => {
 
@@ -43,9 +51,18 @@ exports.getAllProducts = asyncWrapper(async (req, res) => {
 
   const apiFeature = new ApiFeatures(ProductModel.find(), req.query)
     .search()
-    .filter(); 
+    .filter();
 
-  const products = await apiFeature.query;
+  let products = await apiFeature.query;
+
+  products = products.map((product) => {
+    product.images = product.images.map((img) => ({
+      ...img,
+      url: optimizeCloudinaryUrl(img.url),
+    }));
+    return product;
+  });
+
 
   const totalProducts = await ProductModel.countDocuments();
 
@@ -60,7 +77,16 @@ exports.getAllProducts = asyncWrapper(async (req, res) => {
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> get all product admin route>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 exports.getAllProductsAdmin = asyncWrapper(async (req, res) => {
-  const products = await ProductModel.find();
+  let products = await ProductModel.find();
+
+  products = products.map((product) => {
+    product.images = product.images.map((img) => ({
+      ...img,
+      url: optimizeCloudinaryUrl(img.url),
+    }));
+    return product;
+  });
+
 
   res.status(201).json({
     success: true,
@@ -121,7 +147,14 @@ exports.deleteProduct = asyncWrapper(async (req, res, next) => {
 //>>>>>>>>>>>>>>>>>>>>>>> Details of product >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 exports.getProductDetails = asyncWrapper(async (req, res, next) => {
   const id = req.params.id;
-  const Product = await ProductModel.findById(id);
+  let Product = await ProductModel.findById(id);
+  if (Product) {
+    Product.images = Product.images.map((img) => ({
+      ...img,
+      url: optimizeCloudinaryUrl(img.url),
+    }));
+  }
+
   if (!Product) {
     return next(new ErrorHandler("Product not found", 404));
   }
