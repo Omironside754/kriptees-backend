@@ -61,7 +61,10 @@ const orderSchema = new mongoose.Schema({
   shiprocketShipmentId: {
     type: String,
   },
-
+  manualShippingRequired: {
+  type: Boolean,
+  default: false
+},
 
   // order item details array
   orderItems: [
