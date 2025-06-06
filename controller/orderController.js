@@ -82,6 +82,7 @@ exports.newOrder = asyncWrapper(async (req, res, next) => {
   console.log("paymentInfo:", paymentInfo);
 
   let token = await getShiprocketToken();
+  console.log("Shiprocket Token:", token);
 
   // ✅ Validate token (prevent "wrong number of segments")
   if (!token || typeof token !== "string" || !token.includes(".")) {
