@@ -13,6 +13,7 @@ const user = require("./route/userRoute");
 const order = require("./route/orderRoute");
 const product = require("./route/productRoute");
 const payment = require("./route/paymentRoute");
+const blogRoutes = require('./route/blogRoute'); 
 // for req.cookie to get token while autentication
 app.use(cookieParser());
 app.use(express.json());
@@ -31,6 +32,7 @@ app.use("/api/v1", product);
 app.use("/api/v1", user);
 app.use("/api/v1", order);
 app.use("/api/v1", payment);
+app.use("/api/v1", blogRoutes); 
 const __dirname1 = path.resolve();
 
 app.use(express.static(path.join(__dirname1, "/client/build")));
