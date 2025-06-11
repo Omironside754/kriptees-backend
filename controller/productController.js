@@ -97,33 +97,32 @@ exports.getAllProductsAdmin = asyncWrapper(async (req, res) => {
 //>>>>>>>>>>>>>>>>>> Update Admin Route >>>>>>>>>>>>>>>>>>>>>>>
 exports.updateProduct = asyncWrapper(async (req, res, next) => {
   let product = await ProductModel.findById(req.params.id);
-
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));
   }
-  const oldImg = await ProductModel.findById(req.params.id);
 
-  let imagesLinks = oldImg.images
-  for (let i = 0; i < imagesLinks.length; i++) {
-    imagesLinks[i].url = req.body.images[i]
+  // Process images properly
+  let imagesLinks = [];
+  if (req.body.images) {
+    if (Array.isArray(req.body.images)) {
+      imagesLinks = req.body.images.map((img) => ({ url: img }));
+    } else if (typeof req.body.images === "string") {
+      imagesLinks = [{ url: req.body.images }];
+    }
+    req.body.images = imagesLinks;
   }
-  console.log("IMAGESLINKS:" + imagesLinks)
 
-  // req.body.user = req.user.id;
-  req.body.images = imagesLinks;
+  // Update product
   product = await ProductModel.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
     useFindAndModify: false,
   });
 
-  console.log(product)
-
-  res.status(201).json({
+  res.status(200).json({
     success: true,
-    product: product,
+    product,
   });
-
 });
 
 
