@@ -14,7 +14,7 @@ const optimizeCloudinaryUrl = (url, width = 600) => {
 
 // >>>>>>>>>>>>>>>>>>>>> createProduct Admin route  >>>>>>>>>>>>>>>>>>>>>>>>
 exports.createProduct = asyncWrapper(async (req, res) => {
-
+   console.log("📝 Form Data Received:", req.body);
   const images = [];
   // console.log(req.body)
   const imagesLinks = [];
@@ -97,33 +97,41 @@ exports.getAllProductsAdmin = asyncWrapper(async (req, res) => {
 //>>>>>>>>>>>>>>>>>> Update Admin Route >>>>>>>>>>>>>>>>>>>>>>>
 exports.updateProduct = asyncWrapper(async (req, res, next) => {
   let product = await ProductModel.findById(req.params.id);
+
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));
   }
 
-  // Process images properly
-  let imagesLinks = [];
+  // handle updated image list
   if (req.body.images) {
-    if (Array.isArray(req.body.images)) {
-      imagesLinks = req.body.images.map((img) => ({ url: img }));
-    } else if (typeof req.body.images === "string") {
-      imagesLinks = [{ url: req.body.images }];
+    const images = [];
+
+    if (typeof req.body.images === "string") {
+      images.push(req.body.images);
+    } else if (Array.isArray(req.body.images)) {
+      req.body.images.forEach((img) => {
+        if (typeof img === "string" && img.trim() !== "") {
+          images.push(img);
+        }
+      });
     }
+
+    const imagesLinks = images.map((url) => ({ url }));
     req.body.images = imagesLinks;
   }
 
-  // Update product
   product = await ProductModel.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
     useFindAndModify: false,
   });
 
-  res.status(200).json({
+  res.status(201).json({
     success: true,
     product,
   });
 });
+
 
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  delete product --admin  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
