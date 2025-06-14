@@ -6,7 +6,7 @@ router.route("/payment/createOrder").post(async (req, res) => {
   try {
     Cashfree.XClientId = process.env.X_ID;
     Cashfree.XClientSecret = process.env.X_SECRET;
-    Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
+    Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
 
     const orderId = req.body.ID;
     const returnUrl = `https://kriptees.com/success?orderId=${encodeURIComponent(orderId)}`;
@@ -56,7 +56,7 @@ router.route("/payment/check").post(async (req, res) => {
   try {
     Cashfree.XClientId = process.env.X_ID;
     Cashfree.XClientSecret = process.env.X_SECRET;
-    Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
+    Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
 
     const orderID = req.body.orderId || req.body.cfOrderId;
 
