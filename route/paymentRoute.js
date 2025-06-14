@@ -6,19 +6,21 @@ router.route("/payment/createOrder").post(async (req, res) => {
   try {
     Cashfree.XClientId = process.env.X_ID;
     Cashfree.XClientSecret = process.env.X_SECRET;
-    Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
+    Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
 
     const orderId = req.body.ID;
     const returnUrl = `https://kriptees.com/success?orderId=${encodeURIComponent(orderId)}`;
-
+    const orderAmount = (
+      Number(req.body.itemsPrice) + Number(req.body.shippingPrice)
+    ).toFixed(2).toString();
     var request = {
-      order_amount: req.body.itemsPrice+ req.body.shippingPrice,
+      order_amount: orderAmount,
       order_currency: "INR",
       order_id: orderId,
       customer_details: {
         customer_id: (
           req.body.shippingInfo.firstName + "_" + req.body.shippingInfo.phoneNo
-        ).replace(/\W+/g, "_"), 
+        ).replace(/\W+/g, "_"),
         customer_phone: req.body.shippingInfo.phoneNo,
         customer_name:
           req.body.shippingInfo.firstName + " " + req.body.shippingInfo.lastName,
@@ -54,10 +56,10 @@ router.route("/payment/check").post(async (req, res) => {
   try {
     Cashfree.XClientId = process.env.X_ID;
     Cashfree.XClientSecret = process.env.X_SECRET;
-    Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
-    
+    Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
+
     const orderID = req.body.orderId || req.body.cfOrderId;
-    
+
     console.log("Attempting to fetch payment details for order:", orderID);
 
     if (!orderID) {
@@ -66,8 +68,8 @@ router.route("/payment/check").post(async (req, res) => {
     }
 
     const response = await Cashfree.PGOrderFetchPayments("2023-08-01", orderID);
-  //  console.log("Raw payment details response:", response);
-    
+    //  console.log("Raw payment details response:", response);
+
     if (response && response.data) {
       console.log("Payment details fetched successfully:", response.data);
       return res.send(response.data);
@@ -80,7 +82,7 @@ router.route("/payment/check").post(async (req, res) => {
     console.error("Full error object:", error);
     console.error("Error message:", error.message);
     console.error("Error response:", error.response?.data);
-    
+
     return res.status(500).send({
       message: "Error fetching payment details",
       error: error.response?.data?.message || error.message
