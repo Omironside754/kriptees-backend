@@ -6,10 +6,13 @@ router.route("/payment/createOrder").post(async (req, res) => {
   try {
     Cashfree.XClientId = process.env.X_ID;
     Cashfree.XClientSecret = process.env.X_SECRET;
-    Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
+    Cashfree.XEnvironment =
+      process.env.CASHFREE_ENVIRONMENT === "production"
+        ? Cashfree.Environment.PRODUCTION
+        : Cashfree.Environment.SANDBOX;
 
     const orderId = req.body.ID;
-    const returnUrl = `https://kriptees.com/success?orderId=${encodeURIComponent(orderId)}`;
+    const returnUrl = `${process.env.FRONTEND_URL}/success?orderId=${encodeURIComponent(orderId)}`;
     const orderAmount = (
       Number(req.body.itemsPrice) + Number(req.body.shippingPrice)
     ).toFixed(2).toString();
@@ -56,7 +59,10 @@ router.route("/payment/check").post(async (req, res) => {
   try {
     Cashfree.XClientId = process.env.X_ID;
     Cashfree.XClientSecret = process.env.X_SECRET;
-    Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
+    Cashfree.XEnvironment =
+      process.env.CASHFREE_ENVIRONMENT === "production"
+        ? Cashfree.Environment.PRODUCTION
+        : Cashfree.Environment.SANDBOX;
 
     const orderID = req.body.orderId || req.body.cfOrderId;
 

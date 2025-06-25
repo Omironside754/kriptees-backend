@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(fileUpload());
 app.use(errorMiddleware);
 const corsOptions = {
-  origin: ['http://localhost:3000','https://kriptees.com'],
+  origin: ['http://localhost:3000','https://kriptees.com','http://localhost:5000'],
   credentials: true,
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
